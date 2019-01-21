@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="http://localhost:8081/socket.io/socket.io.js"></script>
+	<script>
+		let sock = io.connect('ws://localhost:8081/')
+		console.log(sock)
+		document.onclick= function() {
+			// 发消息
+			sock.emit('name','finget')
+		}
+
+		// 接收消息
+		sock.on('first', function(msg){
+			document.write(msg)
+		})
+	</script>
+</head>
+<body>
+	
+</body>
+</html>
