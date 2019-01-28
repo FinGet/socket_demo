@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>聊天室</title>
+	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+	<script>
+		let sock = io.connect('ws://localhost:8080/')
+		window.onload = function() {
+			let type = 'reg_ret'
+			let oBtn = document.getElementById('btn') 
+			let oBtn1 = document.getElementById('btn1') 
+			let oUser = document.getElementById('userName')
+			let oPass = document.getElementById('passWord')
+
+			// 注册
+			oBtn.onclick= function(){
+				sock.emit('reg',oUser.value,oPass.value)
+				type = 'reg_ret'
+			}
+			// 登录
+			oBtn1.onclick= function(){
+				sock.emit('login',oUser.value,oPass.value)
+				type = 'login_ret'
+			}
+			// 接收注册
+			
+				sock.on('reg_ret', (code, msg) => {
+					if(code) {
+						alert('注册失败:' +msg)
+					} else {
+						alert('注册成功!')
+					}
+				})
+		}
+	</script>
+</head>
+<body>
+	<label for="">用户名: </label><input type="text" id="userName"> <br>
+	<label for="">密码: </label><input type="password" id="passWord"> <br>
+	<button id="btn">注册</button>
+	<button id="btn1">登录</button>
+	<hr>
+</body>
+</html>
