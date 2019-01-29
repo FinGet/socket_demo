@@ -28,8 +28,13 @@ let regs = {
 		username: /^\w{6,32}$/,
 		password: /^.{6,32}$/
 }
+let aSock=[];
 let wsServer = io.listen(httpServer)
 wsServer.on('connection', sock => {
+  aSock.push(sock)
+  let cur_username='';
+  let cur_userID=0;
+  // 注册
 	sock.on('reg', (user, pass) => {
 		//1.校验数据
     if(!regs.username.test(user)){
@@ -58,6 +63,7 @@ wsServer.on('connection', sock => {
       });
     }
 	})
+  // 登录
 	sock.on('login', (user, pass) => {
 		console.log(user,pass)
 		//1.校验数据
@@ -89,4 +95,31 @@ wsServer.on('connection', sock => {
       });
     }
 	})
+  //发言
+  sock.on('msg', txt=>{
+    if(!txt){
+      sock.emit('msg_ret', 1, '消息文本不能为空');
+    }else{
+      //广播给所有人
+      aSock.forEach(item=>{
+        if(item==sock)return;
+
+        item.emit('msg', cur_username, txt);
+      });
+
+      sock.emit('msg_ret', 0, '发送成功');
+    }
+  });
+  // 离线
+  sock.on('disconnect',function() {
+    console.log(cur_userID)
+    db.query(`UPDATE user_table SET online=0 WHERE ID=${cur_userID}`, err => {
+      if(err){
+        console.log('数据库有错'+ err)
+      }
+      cur_username='';
+      cur_userID=0;
+      aSock = aSock.filter(item => item!=sock)
+    })
+  })
 })
